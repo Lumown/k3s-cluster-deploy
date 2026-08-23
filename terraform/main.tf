@@ -15,7 +15,7 @@ provider "proxmox" {
   pm_tls_insecure     = true
 }
 
-resource "proxmox_vm_qemu" "k8s_nodes" {
+resource "proxmox_vm_qemu" "k3s_nodes" {
   for_each = var.vm_params
 
   name        = each.key
