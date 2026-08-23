@@ -1,0 +1,59 @@
+- name: Prepare all nodes for Kubernetes
+  hosts: k8s_cluster
+  become: true
+
+  tasks:
+    - name: Disable SWAP (Kubelet requirement)
+      ansible.builtin.command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+      changed_when: true
+
+    - name: Disable SWAP  in fstab (Persistence)
+      ansible.builtin.replace:
+        path: /etc/fstab
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+        replace: '# \1'
+
+    - name: Enable IPv4 forwarding
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: true
+        state: present
+        reload: true
+
+- name: Setup K3w Control plane
+  hosts: master
+  become: true
+
+  tasks:
+    - name: Install K3s server
+      tags: k3s_install
+      ansible.builtin.shell:
+        cmd: set -o pipefail && curl -sfL https://get.k3s.io | sh
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/k3s
+
+    - name: Get K3s node token
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: node_token_b64
+
+    - name: Set token fact
+      ansible.builtin.set_fact:
+        k3s_token: "{{ node_token_b64['content'] | b64decode | trim }}"
+      no_log: true
+
+- name: Setup K3s Workers
+  hosts: workers
+  become: true
+  tasks:
+    - name: Install K3s agent and join cluster
+      ansible.builtin.shell:
+        cmd: >
+          set -o pipefail && curl -sfL https://get.k3s.io |
+          K3S_URL=https://{{ hostvars[groups['master'][0]]['ansible_host'] }}:6443 K3S_TOKEN={{ hostvars[groups['master'][0]]['k3s_token'] }} sh -
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/k3s

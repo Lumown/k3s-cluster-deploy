@@ -1,0 +1,6 @@
+.ansible/
+terraform.tfstate*
+terraform.tfvars
+.terraform.*
+.terraform/
+*.backup

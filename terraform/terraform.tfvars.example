@@ -1,0 +1,6 @@
+pm_api_url          = "https://"
+pm_api_token_id     = ""
+pm_api_token_secret = ""
+ssh_public_key = ""
+proxmox_node = ""
+ciuser = ""
