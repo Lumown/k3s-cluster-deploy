@@ -37,7 +37,6 @@ terraform apply
 3. Настройка ОС и кластера
 ```
 cd ansible
-# Указать IP машин в hosts.ini
 ansible-playbook -i hosts.ini k3s_setup.yml 
 ```
 
