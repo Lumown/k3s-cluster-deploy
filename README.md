@@ -15,7 +15,7 @@
 
 ```
 if ! test -e ~/noble-server-cloudimg-amd64.qcow2; then
-  curl https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img -o noble-server-cloudimg-amd64.qcow2
+  curl https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img -o ~/noble-server-cloudimg-amd64.qcow2
 fi
 qm create 9999 --name "init" --memory 2048 --net0 virtio,bridge=vmbr0
 qm disk import 9999 ~/noble-server-cloudimg-amd64.qcow2 local --format qcow2
